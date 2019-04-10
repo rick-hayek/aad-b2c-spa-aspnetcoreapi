@@ -1,4 +1,4 @@
-# setup this single page application from scratch
+# Set up this single page application from scratch
 
 ## Prerequisites
 
@@ -16,6 +16,8 @@ npm init -y
 ```
 
 ## Setting up webpack
+
+Why [webpack](https://webpack.js.org/concepts)? Here's a [great artical](https://blog.andrewray.me/webpack-when-to-use-and-why/) talking about the ability that webpack has.
 
 ```bash
 npm i webpack webpack-cli --save-dev
@@ -47,4 +49,23 @@ npm ERR! Exit status 2
 npm ERR!
 npm ERR! Failed at the web@1.0.0 build script.
 npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+```
+
+The error occurs because webpack is trying to find the entry point that is specified in configure file. Since we havn't create any configuration file, the default one will be "./src/index.js".
+
+```text
+Since version 4.0.0, webpack does not require a configuration file to bundle your project.
+```
+
+So let add the index.js to ./src/:
+
+```bash
+cd src
+touch index.js
+```
+
+And add the following contents to index.js:
+
+```JavaScript
+console.log("hello webpack!");
 ```

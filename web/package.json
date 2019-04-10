@@ -5,13 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production",
+    "start": "node app"
   },
-  "keywords": [],
-  "author": "Rick Huang",
-  "license": "ISC",
+
   "devDependencies": {
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
-  }
+  },
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  
+  "keywords": [],
+  "author": "Rick Huang",
+  "license": "ISC"
 }

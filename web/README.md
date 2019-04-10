@@ -2,3 +2,17 @@
 
 ## How to run this sample
 
+### Step 1: Clone this repository
+
+```bash
+git clone https://github.com/rick-hayek/aad-b2c-spa-aspnetcoreapi.git
+```
+
+### Step 2: Run the application
+
+```bash
+cd web
+npm install && npm update
+npm run start
+
+```

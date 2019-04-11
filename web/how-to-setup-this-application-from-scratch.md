@@ -1,6 +1,6 @@
 # Set up this single page application from scratch
 
-This is gonna be a long article. I'm trying to help you understand how all those frontend related technologies and tools work under the hood.
+This is gonna be long. I'm trying to explain details about how all those frontend related technologies and tools work under the hood, specifically, for node.js, express, webpack, and babel.
 
 ## Prerequisites
 
@@ -13,6 +13,7 @@ This demo application is running under (should work in an environment with highe
 - nodejs@v11.13.0
 - npm@6.7.0
 - webpack@4.29.6
+- express@4.16.4
 
 ## Construct the folder hierarchy
 
@@ -170,7 +171,7 @@ From terminal, issue command:
 node app.js
 ```
 
-and then open browser, navigate to http://127.0.0.1:3000. You can it returns `Hello World`, just as what we define in `app.js`.
+and then open browser, navigate to http://127.0.0.1:3000. You can find that it returns `Hello World`, just as what we have defined in `app.js`.
 
 ### Start server from package.json
 

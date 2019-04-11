@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "start": "node app"
   },
-
+  
   "devDependencies": {
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
@@ -17,7 +17,7 @@
   "dependencies": {
     "express": "^4.16.4"
   },
-  
+
   "keywords": [],
   "author": "Rick Huang",
   "license": "ISC"

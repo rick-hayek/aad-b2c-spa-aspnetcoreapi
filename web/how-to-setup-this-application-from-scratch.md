@@ -134,11 +134,13 @@ module.exports = {
 }
 ```
 
-Now run `npm run build`, you will find `.\dist\bundle.js` is generated (instead of the default main.js). This is where you can define all your customization and extend configurations. For now we can leave everything here. We will go back to this `webpack.config.js` soon.
+Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default main.js) is generated. This is where you can define all your customization and extend configurations. For now we can leave everything here. We will go back to this `webpack.config.js` soon.
 
 For more advanced configurations, check this [document](https://webpack.js.org/configuration).
 
 ## Set up node web server
+
+[Node.js](https://nodejs.org/) is a JavaScript runtime built on Chrome's V8 JavaScript engine. You may get more idea about node.js from this [thread](https://stackoverflow.com/questions/1884724/what-is-node-js) on stackoverlfow.
 
 Create `app.js`:
 
@@ -193,6 +195,8 @@ npm start
 ```
 
 ## Set up Express
+
+You should use [express](https://expressjs.com/). This is [why](https://stackoverflow.com/a/17514674/5629917). And [this](http://evanhahn.com/understanding-express/) can help understand express more.
 
 Install express:
 

@@ -2,6 +2,13 @@
 
 This is gonna be long. I'm trying to explain details about how all those frontend related technologies and tools work under the hood, specifically, for node.js, express, webpack, and babel.
 
+## Contents
+
+- Setting up node web server
+- Setting up express
+- Setting up webpack
+- Setting up babel
+
 ## Prerequisites
 
 [node.js](https://nodejs.org/) is required to be installed.
@@ -12,8 +19,8 @@ This demo application is running under (should work in an environment with highe
 
 - nodejs@v11.13.0
 - npm@6.7.0
-- webpack@4.29.6
 - express@4.16.4
+- webpack@4.29.6
 
 ## Construct the folder hierarchy
 
@@ -25,6 +32,265 @@ cd web
 mkdir -p src
 npm init -y
 ```
+
+## Setting up node web server
+
+[Node.js](https://nodejs.org/) is a JavaScript runtime built on Chrome's V8 JavaScript engine. We can host a web site on a node server. You may get more idea about node.js from this [thread](https://stackoverflow.com/questions/1884724/what-is-node-js) on stackoverlfow.
+
+### Initializing node server
+
+Create `app.js`:
+
+```bash
+touch app.js
+```
+
+Let's initialize the file by following [node.js start guide](https://nodejs.org/en/docs/guides/getting-started-guide/). Put below contents into `app.js` (app-v1.js):
+
+```javascript
+const http = require('http');
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello World\n');
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+From terminal, issue command:
+
+```bash
+node app.js
+```
+
+And then open browser, navigate to <http://127.0.0.1:3000.> You can find that it returns `Hello World`, just as what we have defined in `app.js`.
+
+### Starting server from package.json
+
+Open up `package.json`, and modify the `scripts` section as below:
+
+```json
+"scripts": {
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "start": "node app"
+},
+```
+
+Now run command:
+
+```bash
+npm start
+```
+
+### Handling different requests
+
+Let's update `app.js` as following (app-v2.js):
+
+```javascript
+const http = require('http');
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  const body = 'Request URL: ' + req.url + '\n' +
+    'Request Method: ' + req.method + '\n' +
+    'Request Header: ' + JSON.stringify(req.headers) + '\n' +
+    'Request localAddress: ' + req.socket.localAddress + '\n' +
+    'Request localPort: ' + req.socket.localPort + '\n' +
+
+    'Request remoteAddress: ' + req.socket.remoteAddress + '\n' +
+    'Request remotePort: ' + req.socket.remotePort + '\n' +
+    'Request remoteFamily: ' + req.socket.remoteFamily + '\n';
+  
+  var output = '';
+    if (req.url === '/') {
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.end('This is HOME page! \n' + body);
+    }
+    else if (req.url === '/about') {
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.end('This is ABOUT page! \n' + body);
+    }
+    else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('404 error! File not found.');
+    }
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+Run `npm start` from terminal. Then navigate to
+
+- <http://127.0.0.1/>
+- <http://127.0.0.1/about>
+- <http://127.0.0.1/anythingelse>
+
+We can browse these urls because we've used bunch of `if/else` to set up routes in `app.js`. This is ugly, and will be painful when web application gets complex.
+
+## Setting up express
+
+You should use [express](https://expressjs.com/). Here's [why](https://stackoverflow.com/a/17514674/5629917). And [this](http://evanhahn.com/understanding-express/) can help you understand express more.
+
+Install express:
+
+```bash
+npm i express
+```
+
+### Bringing express in
+
+Update `app.js` as:
+
+```javascript
+// Import node.js built-in http module
+const http = require('http');
+
+// Import express module
+const express = require('express');
+// Build app
+const app = express();
+
+// Use express to add middleware
+app.use((req, res) => {
+  if (req.url === '/') {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('This is HOME page! \n');
+  }
+  else if (req.url === '/about') {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('This is ABOUT page! \n');
+  }
+  else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('404 error! File not found. \n');
+  }
+});
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+http.createServer(app).listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+Surely everything will work well. But still the ugly `if/else` is there. As we can see, express helps to add middleware to request pipeline. So why don't we just split every `if/else` into different middleware, and inject them all to request pipeline.
+
+Let's update `app.js` as (app-v3.js):
+
+```javascript
+// Import node.js built-in http module
+const http = require('http');
+
+// Import express
+const express = require('express');
+// Build app
+const app = express();
+
+// Add middleware to handle '/'
+app.use((req, res) => {
+  if (req.url === '/') {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('This is HOME page! \n');
+    return; // The later middleware won't be run as response ends here
+  }
+  
+  // Continue to next middleware if request is not handled
+  req.next();
+});
+
+// Add middleware to handle '/about'
+app.use((req, res) => {
+  if (req.url === '/about') {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('This is ABOUT page! \n'); 
+    return; // The later middleware won't be run as response ends here
+  }
+
+  req.next();
+});
+
+// Add middleware to handle all other requests
+app.use((req, res) => {
+  res.writeHead(404, { 'Content-Type': 'text/plain' })
+  res.end('404 error! File not found. \n');
+});
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+http.createServer(app).listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+Run `npm start` to check if you get the expected results. We get some progress, though somehow is still ugly, but works.
+
+### Introducing routing
+
+Routing is an approach to map the requests to respective handler, just like the above `if` pathes. Express has this great feature which enables us getting rid of all those `if/else`.
+
+Update `app.js` as following (app-v4.js):
+
+```javascript
+// Import node.js built-in http module
+const http = require('http');
+
+// Import express
+const express = require('express');
+// Build app
+const app = express();
+
+// Set response code
+app.use((req, res) => {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    // Continue to next middleware as request is not completely handled
+    req.next();
+});
+
+// Add middleware to handle '/'
+app.get('/', (req, res) => {
+  res.end('This is HOME page! \n');
+});
+
+// Add middleware to handle '/about'
+app.get('/about', (req, res) => {
+  res.end('This is ABOUT page! \n');
+});
+
+// Add middleware to handle all other requests
+app.get('*', (req, res) => {
+  res.end('404 error! File not found. \n');
+});
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+Now it's cleaner and more beautiful. It can be much more powerful, we will experience it later. Run `npm start` to test the results.
+
+We use bunch of `app.get` to handle different requests. The express `get()` method maps to `HTTP GET` method. You can use `app.post`, `app.put`, etc. for other request methods.
+
+Ok, it's time to host a real site on our node server.
+
+## Hosting a static html page
+
+a
 
 ## Setting up webpack
 
@@ -41,6 +307,7 @@ Open up the [package.json](https://docs.npmjs.com/files/package.json), which is 
 ```json
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app",
     "build": "webpack"
   },
 ```
@@ -101,11 +368,12 @@ WARNING in configuration
 The 'mode' option has not been set, webpack will fallback to 'production' for this value. Set 'mode' option to 'development' or 'production' to enable defaults for each environment.aults for each environment.
 ```
 
-A production bundled output will be minified. Modify the package.json as following:
+A production bundled output will be minified. Modify the `package.json` as following:
 
 ```json
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app",
     "dev": "webpack --mode development",
     "build": "webpack --mode production"
   },
@@ -138,203 +406,3 @@ Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the defaul
 
 For more advanced configurations, check this [document](https://webpack.js.org/configuration).
 
-## Set up node web server
-
-[Node.js](https://nodejs.org/) is a JavaScript runtime built on Chrome's V8 JavaScript engine. You may get more idea about node.js from this [thread](https://stackoverflow.com/questions/1884724/what-is-node-js) on stackoverlfow.
-
-Create `app.js`:
-
-```bash
-touch app.js
-```
-
-Let's initialize the file by following [node.js start guide](https://nodejs.org/en/docs/guides/getting-started-guide/). Put below contents into `app.js` (app-v1.js):
-
-```javascript
-const http = require('http');
-
-const hostname = '127.0.0.1';
-const port = 3000;
-
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
-});
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
-```
-
-From terminal, issue command:
-
-```bash
-node app.js
-```
-
-and then open browser, navigate to <http://127.0.0.1:3000.> You can find that it returns `Hello World`, just as what we have defined in `app.js`.
-
-### Start server from package.json
-
-Open up `package.json`, and modify the `scripts` section as below:
-
-```json
-"scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "dev": "webpack --mode development",
-  "build": "webpack --mode production",
-  "start": "node app"
-},
-```
-
-Now run command:
-
-```bash
-npm start
-```
-
-## Set up express
-
-You should use [express](https://expressjs.com/). Here's [why](https://stackoverflow.com/a/17514674/5629917). And [this](http://evanhahn.com/understanding-express/) can help you understand express more.
-
-Install express:
-
-```bash
-npm i express
-```
-
-### Before introducing express
-
-Let's update `app.js` as following (app-v2.js):
-
-```javascript
-const http = require('http');
-
-const hostname = '127.0.0.1';
-const port = 3000;
-
-const server = http.createServer((req, res) => {
-  const body = 'Request URL: ' + req.url + '\n' +
-    'Request Method: ' + req.method + '\n' +
-    'Request Header: ' + JSON.stringify(req.headers) + '\n' +
-    'Request localAddress: ' + req.socket.localAddress + '\n' +
-    'Request localPort: ' + req.socket.localPort + '\n' +
-
-    'Request remoteAddress: ' + req.socket.remoteAddress + '\n' +
-    'Request remotePort: ' + req.socket.remotePort + '\n' +
-    'Request remoteFamily: ' + req.socket.remoteFamily + '\n';
-  
-  var output = '';
-    if (req.url === '/') {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end('This is HOME page! \n' + body);
-    }
-    else if (req.url === '/about') {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end('This is ABOUT page! \n' + body);
-    }
-    else {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 error! File not found.');
-    }
-});
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
-```
-
-Run `npm start` from terminal. Then navigate to
-
-- <http://127.0.0.1/>
-- <http://127.0.0.1/about>
-- <http://127.0.0.1/anythingelse>
-
-We can browser these urls because we've used bunch of `if/else` to set up routines in `app.js`. This is ugly, and will be painful when web application gets complex.
-
-### Bring express in
-
-Update `app.js` as:
-
-```javascript
-// Import node.js built-in http module
-const http = require('http');
-
-// Import express
-const express = require('express');
-// Build app
-const app = express();
-
-// Use express to add middleware
-app.use((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is HOME page! \n');
-  }
-  else if (req.url === '/about') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is ABOUT page! \n');
-  }
-  else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('404 error! File not found. \n');
-  }
-});
-
-const hostname = '127.0.0.1';
-const port = 3000;
-
-http.createServer(app).listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
-```
-
-Surely everything will work well. But still the ugly `if/else` is there. As we can see, express helps to add middleware to request pipeline. So why don't we just split every `if/else` into different middleware, and inject them all to request pipeline. 
-
-Let's update `app.js` as:
-
-```javascript
-// Import node.js built-in http module
-const http = require('http');
-
-// Import express
-const express = require('express');
-// Build app
-const app = express();
-
-// Add middleware to handle '/'
-app.use((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is HOME page! \n');
-    return;
-  }
-  
-  req.next();
-});
-
-// Add middleware to handle '/about'
-app.use((req, res) => {
-  if (req.url === '/about') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is ABOUT page! \n');
-    return;
-  }
-  
-  req.next();
-});
-
-// Add middleware to handle all other requests
-app.use((req, res) => {
-  res.writeHead(404, { 'Content-Type': 'text/plain' })
-  res.end('404 error! File not found. \n');
-});
-
-const hostname = '127.0.0.1';
-const port = 3000;
-
-http.createServer(app).listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
-```

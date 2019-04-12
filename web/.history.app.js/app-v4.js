@@ -1,25 +1,21 @@
 // Import node.js built-in http module
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
 
 // Import express
 const express = require('express');
 // Build app
 const app = express();
 
-// Add middleware to handle '/'
-app.get('/', (req, res) => {
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  var stream = fs.createReadStream(__dirname + '/public/index.html', 'utf8')
-  stream.pipe(res);
+// Set response code
+app.use((req, res) => {
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    // Continue to next middleware as request is not completely handled
+    req.next();
 });
 
-// Render a specific html file
-app.get('/render', (req, res) => {
-  res.sendFile('public/index1.html', {
-    root: path.join(__dirname, '/')
-  } );
+// Add middleware to handle '/'
+app.get('/', (req, res) => {
+  res.end('This is HOME page! \n');
 });
 
 // Add middleware to handle '/about'
@@ -29,7 +25,6 @@ app.get('/about', (req, res) => {
 
 // Add middleware to handle all other requests
 app.get('*', (req, res) => {
-  res.writeHead(404, {'Content-Type': 'text/plain'});
   res.end('404 error! File not found. \n');
 });
 

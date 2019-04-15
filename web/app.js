@@ -7,7 +7,26 @@ const path = require('path');
 // Import chokidar for reloading server and refreshing frontend page instantly 
 // once any file gets changed
 const chokidar = require('chokidar');
-const watcher = chokidar.watch('.', {ignored: ''});
+const watcher = chokidar.watch('.', {
+  ignored: ['./node_modules/**', './dist/**', './.history.app.js/**'],
+  ignoreInitial: true
+});
+
+watcher.on('all', (event, path) => {
+  console.log(event, path);
+
+  Object.keys(require.cache).forEach(id=>{
+
+    //console.log(id);
+    if (/[\/\\]public[\/\\]/.test(id)) {
+      delete require.cache[id];
+    }
+
+    if (/app.js/.test(id)) {
+      delete require.cache[id];
+    }
+  });
+});
 
 // Import express
 const express = require('express');

@@ -214,7 +214,7 @@ app.use((req, res) => {
 app.use((req, res) => {
   if (req.url === '/about') {
     res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is ABOUT page! \n'); 
+    res.end('This is ABOUT page! \n');
     return; // The later middleware won't be run as response ends here
   }
 
@@ -284,13 +284,153 @@ app.listen(port, hostname, () => {
 
 Now it's cleaner and more beautiful. It can be much more powerful, we will experience it later. Run `npm start` to test the results.
 
-We use bunch of `app.get` to handle different requests. The express `get()` method maps to `HTTP GET` method. You can use `app.post`, `app.put`, etc. for other request methods.
+We use bunch of `app.get` to handle different requests. The express `get()` api maps to `HTTP GET` method. You can use `app.post`, `app.put`, etc. for other request methods.
 
 Ok, it's time to host a real site on our node server.
 
 ## Hosting a static html page
 
-a
+We can start from hosting a static HTML file. Let's create a simple html file:
+
+```bash
+mkdir public
+cd public
+touch index.html
+```
+
+And initialize the `index.html` as following contents (or anything else as long as it's a valid HTML page):
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home Page</title>
+        <style>
+            h1 {
+                font: bold;
+                color: burlywood;
+                text-align: center;
+            }
+
+            p {
+                color: blue;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>This is most awesome web site</h1>
+        <p>You can never find a better one anywhere else</p>
+    </body>
+</html>
+```
+
+Go back to `\web\` folder. Update `app.js` to (app-v5.js):
+
+```javascript
+// Import node.js built-in http module
+const http = require('http');
+// Import node.js file system module
+const fs = require('fs');
+// Import path module
+const path = require('path');
+
+// Import express
+const express = require('express');
+// Build app
+const app = express();
+
+// Add middleware to handle '/'
+app.get('/', (req, res) => {
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  // Use node API fs.createReadStream to deal with file reading
+  var stream = fs.createReadStream(__dirname + '/public/index.html', 'utf8')
+  stream.pipe(res);
+});
+
+// Render a specific html file
+app.get('/render', (req, res) => {
+  // Use express API to response users' request
+  // sendFile has the ability to set the Content-Type header based on file extension
+  res.sendFile('public/index.html', {
+    root: path.join(__dirname, '/')
+  } );
+});
+
+// Add middleware to handle '/about'
+app.get('/about', (req, res) => {
+  res.end('This is ABOUT page! \n');
+});
+
+// Add middleware to handle all other requests
+app.get('*', (req, res) => {
+  res.writeHead(404, {'Content-Type': 'text/plain'});
+  res.end('404 error! File not found. \n');
+});
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+You can observe that we are introducing two node modules:
+
+```javascript
+// Import node.js file system module
+const fs = require('fs');
+// Import path module
+const path = require('path');
+```
+
+The [fs](https://nodejs.org/dist/latest-v11.x/docs/api/fs.html) module provides an API for interacting with the file system in a manner closely modeled around standard POSIX functions. To use this module:
+
+```javascript
+const fs = require('fs');
+```
+
+The [path](https://nodejs.org/dist/latest-v11.x/docs/api/path.html) module provides utilities for working with file and directory paths. It can be accessed using:
+
+```javascript
+const path = require('path');
+```
+
+I've used two alternative methods to render a static file, node API `fs.createReadStream` and express API `res.sendFile`. In most situation, `res.sendFile`, which eventually calls the node `fs` APIs,  is fair enough for dealing with such kind requests.
+
+From terminal while in `\web` directory, run `npm start`. And then browse <http://127.0.0.1:3000/> and <http://127.0.0.1:3000/render>. See what you can find.
+
+## Applying changes automatically
+
+Now we are getting frontend involved, the code may changed a lot. You may have noticed whenever any configuration change is made, we need to restart node server to get things work. That will significantly slow down your development progress. We can make life better with some tools.
+
+### Restarting node server automatically
+
+We will use [nodemon](https://nodemon.io/) for server restarting.
+
+```bash
+npm i nodemon
+```
+
+Then update the `start` command from `package.json` as:
+
+```json
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app",
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production"
+  },
+```
+
+Now run `npm start`, then modify you `app.js`, such as change any request handler. You will find the change is instantly applied without manually restart node server.
+
+### Refreshing browser page automatically
+
+```bash
+npm i chokidar
+```
 
 ## Setting up webpack
 
@@ -312,7 +452,7 @@ Open up the [package.json](https://docs.npmjs.com/files/package.json), which is 
   },
 ```
 
-Now from terminal (in \web\\), run command:
+Now from terminal (in `\web\`), run command:
 
 ```bash
 npm run build
@@ -321,7 +461,7 @@ npm run build
 You will get errors that complain **"Entry module not found"**. The error should be something like:
 
 ```console
-ERROR in Entry module not found: Error: Can't resolve './src' in 'C:\src\rickrepo\aad-b2c-spa-aspnetcoreapi\web'
+ERROR in Entry module not found: Error: Can't resolve './src' in '<your-working-directory>\web'
 npm ERR! code ELIFECYCLE
 npm ERR! errno 2
 npm ERR! web@1.0.0 build: `webpack`
@@ -350,7 +490,7 @@ And add the following contents to index.js:
 console.log("hello webpack!");
 ```
 
-Now from terminal, go back to \web folder, run `npm run build` again:
+Now from terminal, go back to `\web\` folder, run `npm run build` again:
 
 ```bash
 cd ..
@@ -365,7 +505,8 @@ You will also notice that there's a WARNING message along with the build output:
 
 ```text
 WARNING in configuration
-The 'mode' option has not been set, webpack will fallback to 'production' for this value. Set 'mode' option to 'development' or 'production' to enable defaults for each environment.aults for each environment.
+The 'mode' option has not been set, webpack will fallback to 'production' for this value. Set 'mode' option to 'development' or 'production' to enable defaults for each environment.
+You can also set it to 'none' to disable any default behavior. Learn more: https://webpack.js.org/concepts/mode/
 ```
 
 A production bundled output will be minified. Modify the `package.json` as following:
@@ -385,7 +526,7 @@ Then compare the `.\dist\main.js` after running `npm run dev` and `npm run build
 
 Using default values is fair enough for a startup or learning project, while you should use configuration files for large/complex/production web project.
 
-Create a new file `webpack.config.js` (in \web\\):
+Create a new file `webpack.config.js` (in `\web\`):
 
 ```bash
 touch webpack.config.js
@@ -405,4 +546,3 @@ module.exports = {
 Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default main.js) is generated. This is where you can define all your customization and extend configurations. For now we can leave everything here. We will go back to this `webpack.config.js` soon.
 
 For more advanced configurations, check this [document](https://webpack.js.org/configuration).
-

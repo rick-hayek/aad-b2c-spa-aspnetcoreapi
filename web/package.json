@@ -5,19 +5,19 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app",
+    "start": "nodemon app",
     "dev": "webpack --mode development",
     "build": "webpack --mode production"
   },
-  
   "devDependencies": {
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "express": "^4.16.4"
+    "chokidar": "^2.1.5",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.11"
   },
-
   "keywords": [],
   "author": "Rick Huang",
   "license": "ISC"

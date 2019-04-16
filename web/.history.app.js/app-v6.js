@@ -36,7 +36,7 @@ const app = express();
 app.get('/', (req, res) => {
   res.writeHead(200, {'Content-Type': 'text/html'});
   // Use node API fs.createReadStream to deal with file reading
-  var stream = fs.createReadStream(path.join(__dirname, '/src/public/index.html'), 'utf8');
+  var stream = fs.createReadStream(__dirname + '/public/index.html', 'utf8')
   // pipe stream to response
   stream.pipe(res);
 });
@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 app.get('/render', (req, res) => {
   // Use express API to response users' request
   // sendFile has the ability to set the Content-Type header based on file extension
-  res.sendFile('src/public/index.html', {
+  res.sendFile('public/index.html', {
     root: path.join(__dirname, '/')
   } );
 });

@@ -293,6 +293,7 @@ Ok, it's time to host a real site on our node server.
 We can start from hosting a static HTML file. Let's create a simple html file:
 
 ```bash
+cd src
 mkdir public
 cd public
 touch index.html
@@ -321,6 +322,7 @@ And initialize the `index.html` as following contents (or anything else as long 
     <body>
         <h1>This is most awesome web site</h1>
         <p>You can never find a better one anywhere else</p>
+        <div id='app'></div>
     </body>
 </html>
 ```
@@ -344,7 +346,7 @@ const app = express();
 app.get('/', (req, res) => {
   res.writeHead(200, {'Content-Type': 'text/html'});
   // Use node API fs.createReadStream to deal with file reading
-  var stream = fs.createReadStream(__dirname + '/public/index.html', 'utf8')
+  var stream = fs.createReadStream(path.join(__dirname, '/src/public/index.html'), 'utf8');
   stream.pipe(res);
 });
 
@@ -352,7 +354,7 @@ app.get('/', (req, res) => {
 app.get('/render', (req, res) => {
   // Use express API to response users' request
   // sendFile has the ability to set the Content-Type header based on file extension
-  res.sendFile('public/index.html', {
+  res.sendFile('src/public/index.html', {
     root: path.join(__dirname, '/')
   } );
 });
@@ -418,21 +420,21 @@ Then update the `start` command from `package.json` as:
 ```json
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app",
-    "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "start": "nodemon app"
   },
 ```
 
 Now run `npm start`, then modify you `app.js`, such as change any request handler. You will find the change is instantly applied without manually restart node server.
 
-### Refreshing browser page automatically
+<!-- ### Refreshing browser page automatically
 
 ```bash
 npm i chokidar
-```
+``` -->
 
 ## Setting up webpack
+
+From above steps, we've figured out how node handles user requests, and also tried hosting static HTML files. For a modern web project, static 
 
 Why [webpack](https://webpack.js.org/concepts)? Here's a [great article](https://blog.andrewray.me/webpack-when-to-use-and-why/) talking about the ability that webpack has.
 
@@ -543,6 +545,45 @@ module.exports = {
 }
 ```
 
-Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default main.js) is generated. This is where you can define all your customization and extend configurations. For now we can leave everything here. We will go back to this `webpack.config.js` soon.
+Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default `main.js`) is generated. This is where you can define all your customization and extend configurations. 
+<!-- For now we can leave everything here. We will go back to this `webpack.config.js` soon. -->
 
 For more advanced configurations, check this [document](https://webpack.js.org/configuration).
+
+### Using development tool
+
+It's kind of insane that you have to manually run `npm run build` every time you want to compile your code. Webpack comes with several [development tools](https://webpack.js.org/guides/development#choosing-a-development-tool) that help automatically compile any changes and hopefully refresh the web page. Here we will use `webpack-dev-server`:
+
+```bash
+npm i webpack-dev-server --save-dev
+```
+
+And then update `webpack.config.js` as:
+
+```javascript
+module.exports = {
+    mode: "development",
+    entry: "./src/index.js",
+    devServer: {
+      contentBase: './dist',
+      port: 3000
+    },
+    output: {
+      filename: "bundle.js"
+    }
+};
+```
+
+For more configurations about `webpack-dev-server`, check [here](https://webpack.js.org/configuration/dev-server).
+
+Now update the `scripts` section in `package.json` as:
+
+```json
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack && webpack-dev-server --open",
+    "build": "webpack"
+  },
+```
+
+From terminal, run `npm start`.

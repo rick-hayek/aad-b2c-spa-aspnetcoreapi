@@ -1,6 +1,11 @@
 module.exports = {
-    entry: "./src/index.js",
-    output: {
-      filename: "bundle.js"
-    }
+  mode: "development", // production
+  entry: "./src/index.js",
+  devServer: {
+    contentBase: './dist',
+    port: 3000
+  },
+  output: {
+    filename: "bundle.js"
+  }
 };

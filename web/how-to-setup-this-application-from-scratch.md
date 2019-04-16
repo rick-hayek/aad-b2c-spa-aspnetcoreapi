@@ -434,7 +434,7 @@ npm i chokidar
 
 ## Setting up webpack
 
-From above steps, we've figured out how node handles user requests, and also tried hosting static HTML files. For a modern web project, static 
+From above steps, we've figured out how node handles user requests, and also tried hosting static HTML files. For a modern web project, static files won't provide a 
 
 Why [webpack](https://webpack.js.org/concepts)? Here's a [great article](https://blog.andrewray.me/webpack-when-to-use-and-why/) talking about the ability that webpack has.
 

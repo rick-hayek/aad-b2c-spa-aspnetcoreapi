@@ -4,16 +4,16 @@ This is gonna be long. I'm trying to explain details about how all those fronten
 
 ## Contents
 
-- Setting up node web server
-- Setting up express
-- Setting up webpack
-- Setting up babel
+- [Setting up node web server](placeholder)
+- [Setting up express](placeholder)
+- [Setting up webpack](placeholder)
+- [Setting up babel](placeholder)
 
 ## Prerequisites
 
-[node.js](https://nodejs.org/) is required to be installed.
+[node.js](https://nodejs.org/) needs to be installed.
 
-## Environment
+### Environment
 
 This demo application is running under (should work in an environment with higher versions):
 
@@ -22,7 +22,7 @@ This demo application is running under (should work in an environment with highe
 - express@4.16.4
 - webpack@4.29.6
 
-## Construct the folder hierarchy
+### Construct the folder hierarchy
 
 Launch a terminal, and go to your working directory. Then issue following commands:
 
@@ -434,9 +434,9 @@ npm i chokidar
 
 ## Setting up webpack
 
-From above steps, we've figured out how node handles user requests, and also tried hosting static HTML files. For a modern web project, static files won't provide a 
+From above steps, we've figured out how node handles user requests, and also tried hosting static HTML files. For a modern web project, static files won't provide a good user experience. Usually the contents a web site serves are generated dynamically according to user actions.
 
-Why [webpack](https://webpack.js.org/concepts)? Here's a [great article](https://blog.andrewray.me/webpack-when-to-use-and-why/) talking about the ability that webpack has.
+_webpack bundles everything._ Why [webpack](https://webpack.js.org/concepts)? Here's a [great article](https://blog.andrewray.me/webpack-when-to-use-and-why/) talking about the ability that webpack has.
 
 ### Initial setup for webpack
 
@@ -545,14 +545,47 @@ module.exports = {
 }
 ```
 
-Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default `main.js`) is generated. This is where you can define all your customization and extend configurations. 
-<!-- For now we can leave everything here. We will go back to this `webpack.config.js` soon. -->
+Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default `main.js`) is generated. This is where you can define all your customization and extend configurations.
 
 For more advanced configurations, check this [document](https://webpack.js.org/configuration).
 
+### Using different configurations for different environments
+
+Usually you may want to use different configurations for production and development environments. Create a new fie:
+
+```bash
+touch webpack.prod.config.js
+```
+
+Initialize it with contents:
+
+```javascript
+const path = require('path');
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "bundle.[contenthash:16].js",
+    path: path.join(__dirname, 'dist')
+  }
+}
+```
+
+And then update the scripts from `package.json`:
+
+```json
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app",
+    "dev": "webpack --mode development",
+    "build": "webpack --config webpack.prod.config.js"
+  },
+```
+
 ### Using development tool
 
-It's kind of insane that you have to manually run `npm run build` every time you want to compile your code. Webpack comes with several [development tools](https://webpack.js.org/guides/development#choosing-a-development-tool) that help automatically compile any changes and hopefully refresh the web page. Here we will use `webpack-dev-server`:
+It's kind of insane that you have to manually run `npm run build` whenever you change any code and want to compile your code. Webpack comes with several [development tools](https://webpack.js.org/guides/development#choosing-a-development-tool) that help automatically compile any changes and hopefully refresh the web page. Here we will use `webpack-dev-server`:
 
 ```bash
 npm i webpack-dev-server --save-dev
@@ -564,12 +597,12 @@ And then update `webpack.config.js` as:
 module.exports = {
     mode: "development",
     entry: "./src/index.js",
+    output: {
+      filename: "bundle.js"
+    },
     devServer: {
       contentBase: './dist',
       port: 3000
-    },
-    output: {
-      filename: "bundle.js"
     }
 };
 ```
@@ -582,8 +615,88 @@ Now update the `scripts` section in `package.json` as:
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack && webpack-dev-server --open",
-    "build": "webpack"
+    "dev": "webpack",
+    "build": "webpack --config webpack.prod.config.js"
   },
 ```
 
-From terminal, run `npm start`.
+I update the `dev` command from `webpack --mode development` to `webpack`, 'cause I've added the `mode` parameter in `webpack.config.js`.
+
+From terminal, run `npm start`. It will build your code and launch the node server.
+
+### Processing HTML: HTML plugin for webpack
+
+webpack needs additional components to deal with HTML files: [html-webpack-plugin](https://webpack.js.org/plugins/html-webpack-plugin) and [html-loader](https://webpack.js.org/loaders/html-loader).
+
+A [loader](https://webpack.js.org/concepts/loaders/) does preprocessing transformation of files with a specified file format **before** the bundle is generated. For example, a [ts-loader](https://github.com/TypeStrong/ts-loader) transforms Type-Script to JavaScript.
+
+A [plugin](https://webpack.js.org/concepts/plugins) will do everything that a loader cannot do. It works at bundle or chunk level, and usually work at the end of the bundle generation process.
+
+```bash
+npm i html-webpack-plugin html-loader --save-dev
+```
+
+Then update the `webpack.config.js`:
+
+```javascript
+const path = require('path');
+const HtmlWebPackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: "development", // production
+  entry: "./src/index.js",
+  output: {
+    filename: "bundle.js",
+    path: path.join(__dirname, 'dist') // dist is the default folder name while you can change it to any other name
+  },
+  devServer: {
+    contentBase: './dist',
+    port: 3000
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(html)$/,
+        use: [ { loader: "html-loader" } ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebPackPlugin({
+      template: "./src/public/index.html",
+      filename: "./index.html" // relative path to the PATH from OUTPUT
+    })
+  ]
+};
+```
+
+I add a new property `module` where you can configure rules for handling different files. And I also add a plugin where I specify the HTML template file and the output HTML file. If not providing any parameter for HtmlWebPackPlugin, like:
+
+```javascript
+...
+plugins: [
+    new HtmlWebPackPlugin()
+  ]
+```
+
+then the resulting HTML will be a default one, something like this:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Webpack App</title>
+  </head>
+  <body>
+  <script type="text/javascript" src="bundle.js"></script></body>
+</html>
+```
+
+Run `npm run build`, and check the resulting HTML file `./dist/index.html`. You can observe that the bundled script file `bundle.js` has been injected.
+
+## References
+
+- [Setting up webpack for a project](https://auralinna.blog/post/2018/setting-up-webpack-4-for-a-project)
+- [webpack tutorial](https://www.valentinog.com/blog/webpack-tutorial/)
+- [Setting up webpack for any project](https://scotch.io/tutorials/setting-up-webpack-for-any-project)

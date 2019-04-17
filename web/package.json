@@ -6,17 +6,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack && webpack-dev-server --open",
-    "build": "webpack"
-  },
-  "devDependencies": {
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "webpack-dev-server": "^3.3.1"
+    "dev": "webpack",
+    "build": "webpack --config webpack.prod.config.js"
   },
   "dependencies": {
     "chokidar": "^2.1.5",
     "express": "^4.16.4",
     "nodemon": "^1.18.11"
+  },
+  "devDependencies": {
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.3.1"
   },
   "keywords": [],
   "author": "Rick Huang",

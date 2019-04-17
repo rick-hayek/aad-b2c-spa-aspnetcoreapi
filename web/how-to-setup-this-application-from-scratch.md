@@ -4,9 +4,9 @@ This is gonna be long. I'm trying to explain details about how all those fronten
 
 ## Contents
 
-- [Setting up node web server](placeholder)
-- [Setting up express](placeholder)
-- [Setting up webpack](placeholder)
+- [Setting up node web server](https://github.com/rick-hayek/aad-b2c-spa-aspnetcoreapi/blob/master/web/how-to-setup-this-application-from-scratch.md#setting-up-node-web-server)
+- [Setting up express](https://github.com/rick-hayek/aad-b2c-spa-aspnetcoreapi/blob/master/web/how-to-setup-this-application-from-scratch.md#setting-up-express)
+- [Setting up webpack](https://github.com/rick-hayek/aad-b2c-spa-aspnetcoreapi/blob/master/web/how-to-setup-this-application-from-scratch.md#setting-up-webpack)
 - [Setting up babel](placeholder)
 
 ## Prerequisites

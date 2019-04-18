@@ -4,9 +4,13 @@ const http = require('http');
 const fs = require('fs');
 // Import path module
 const path = require('path');
+// Import express
+const express = require('express');
+
 // Import chokidar for reloading server and refreshing frontend page instantly 
 // once any file gets changed
 const chokidar = require('chokidar');
+
 const watcher = chokidar.watch('.', {
   ignored: ['./node_modules/**', './dist/**', './.history.app.js/**'],
   ignoreInitial: true
@@ -27,9 +31,7 @@ watcher.on('all', (e, p) => {
   });
 });
 
-// Import express
-const express = require('express');
-// Build app
+// Build express app
 const app = express();
 
 // Add middleware to handle '/'

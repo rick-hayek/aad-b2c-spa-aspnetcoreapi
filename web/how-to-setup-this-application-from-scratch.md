@@ -624,13 +624,13 @@ I update the `dev` command from `webpack --mode development` to `webpack`, 'caus
 
 From terminal, run `npm start`. It will build your code and launch the node server.
 
-### Processing HTML: HTML plugin for webpack
+### Processing HTML
 
 webpack needs additional components to deal with HTML files: [html-webpack-plugin](https://webpack.js.org/plugins/html-webpack-plugin) and [html-loader](https://webpack.js.org/loaders/html-loader).
 
-A [loader](https://webpack.js.org/concepts/loaders/) does preprocessing transformation of files with a specified file format **before** the bundle is generated. For example, a [ts-loader](https://github.com/TypeStrong/ts-loader) transforms Type-Script to JavaScript.
+> A [loader](https://webpack.js.org/concepts/loaders/) does preprocessing transformation of files with a specified file format **before** the bundle is generated. For example, a [ts-loader](https://github.com/TypeStrong/ts-loader) transforms Type-Script to JavaScript.
 
-A [plugin](https://webpack.js.org/concepts/plugins) will do everything that a loader cannot do. It works at bundle or chunk level, and usually work at the end of the bundle generation process.
+> A [plugin](https://webpack.js.org/concepts/plugins) will do everything that a loader cannot do. It works at bundle or chunk level, and usually work at the end of the bundle generation process.
 
 ```bash
 npm i html-webpack-plugin html-loader --save-dev
@@ -670,7 +670,7 @@ module.exports = {
 };
 ```
 
-I add a new property `module` where you can configure rules for handling different files. And I also add a plugin where I specify the HTML template file and the output HTML file. If not providing any parameter for HtmlWebPackPlugin, like:
+I add a new property `module` where you can configure rules for handling different files. And I also add a plugin where I specify the HTML template file and the output HTML file. If not providing any parameter for HtmlWebPackPlugin, using like:
 
 ```javascript
 ...
@@ -693,7 +693,176 @@ then the resulting HTML will be a default one, something like this:
 </html>
 ```
 
-Run `npm run build`, and check the resulting HTML file `./dist/index.html`. You can observe that the bundled script file `bundle.js` has been injected.
+Run `npm run build`, and check the resulting HTML file `./dist/index.html`. You can observe that the bundle output file `bundle.js` has been injected (through `<script>`).
+
+### Processing CSS
+
+Create folder:
+
+```bash
+cd src
+mkdir style
+touch main.css
+```
+
+Initial `main.css` as:
+
+```css
+h1 {
+    font: bold;
+    color: burlywood;
+    text-align: center;
+}
+
+p {
+    color: blue;
+    text-align: center;
+}
+```
+
+These styles actually are copied from the `\public\index.html`, so we now can remove those inline styles. Update `\public\index.html` as:
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home Page</title>
+    </head>
+    <body>
+        <h1>This is the most awesome web site</h1>
+        <p>You can never find a better one anywhere else</p>
+        <div id='app'></div>
+    </body>
+</html>
+```
+
+#### css-loader
+
+The [css-loader](https://webpack.js.org/loaders/css-loader) interprets `@import` and `url()`. It reads contents of css file as a string to a JavaScript variable.
+
+```bash
+npm i css-loader --save-dev
+```
+
+For example, you want to import css in a javascript file:
+
+```javascript
+import style from './style/myStyle.css';
+const anotherStyle = require('./style/anotherStyle.css');
+```
+
+Then you will get build error if you don't use `css-loader`. You can update code to:
+
+```javascript
+import style from 'css-loader!./style/myStyle.css';
+const anotherStyle = require('css-loader!./style/anotherStyle.css');
+```
+
+You surely can get style things worked with above approach, while usually you should configure it in `webpack.config.js`. Then it will apply globally, instead of specifying `css-loader` everywhere. To configure `css-loader`, just add another rule to `webpack.config.js`:
+
+```JavaScript
+  module: {
+    rules: [
+      {
+        test: /\.(html)$/,
+        use: [ { loader: "html-loader" } ]
+      },
+      {
+        test: /\.(css)$/,
+        use: [
+          { loader: "css-loader"}
+        ]
+      }
+    ]
+  },
+```
+
+Then you can update the `./src/index.js` as:
+
+```javascript
+import css from './style/main.css';
+
+console.log("hello webpack!");
+console.log(css);
+```
+
+Run `npm start`, and check the `bundle.js`. You can find the stylesheet content is added into the script. You may also observe that the page hasn't apply any styles from `main.css`. This will be resolved by `style-loader`.
+
+Note, you have to import or reference the stylesheet file directly or indirectly by the entry file, which is `./src/index.js` here.
+
+#### style-loader
+
+The [style-loader](https://webpack.js.org/loaders/style-loader) reads the style contents, and injects them into the page's `<head>` element by creating a `<style>` tag (at runtime, not compile/build time).
+
+```bash
+npm i style-loader --save-dev
+```
+
+Then add rule in `webpack.config.js`:
+
+```JavaScript
+  module: {
+    rules: [
+      {
+        test: /\.(html)$/,
+        use: [ { loader: "html-loader" } ]
+      },
+      {
+        test: /\.(css)$/,
+        use: [
+          { loader: "style-loader" },
+          { loader: "css-loader"}
+        ]
+      }
+    ]
+  },
+```
+
+Run `npm start`, you will find the styles are applied on the page.
+
+#### Extracting css into a separated file
+
+Instead of injecting the stylesheet as inline, usually we should reference the stylesheet from an external file from `<link>` tag. [mini-css-extract-plugin](https://webpack.js.org/plugins/mini-css-extract-plugin) provides this alternative.
+
+```bash
+npm install --save-dev mini-css-extract-plugin
+```
+
+Then update `webpack.config.js` as:
+
+```javascript
+...
+// css-mini-extract-plugin extracts styles to an external stylesheet file,
+// and injects it into HTML file by creating a <link> tag in <head> element
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+module.exports = {
+  ...
+  module: {
+    rules: [
+      ...
+      {
+        test: /\.(css)$/,
+        use: [
+          { loader: MiniCssExtractPlugin.loader },
+          { loader: "css-loader"},
+        ]
+      }
+    ]
+  },
+  plugins: [
+    ...
+    new MiniCssExtractPlugin({
+      filename: 'app.[contenthash:8].css', // resulting stylesheet file
+    }),
+  ],
+  ...
+};
+```
+
+Run `npm start`. There will be a separate file `app.[hash:8].css` being generated in the `dist` folder. And from the `./dist/index.html`, this css file is referenced from `<link>` tag in `<head>` element.
+
+Browse <http://localhost:3000/>, the styles are applied on index page.
 
 ## References
 

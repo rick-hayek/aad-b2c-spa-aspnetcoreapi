@@ -48,15 +48,15 @@ touch app.js
 Let's initialize the file by following [node.js start guide](https://nodejs.org/en/docs/guides/getting-started-guide/). Put below contents into `app.js` (app-v1.js):
 
 ```javascript
-const http = require('http');
+const http = require("http");
 
-const hostname = '127.0.0.1';
+const hostname = "127.0.0.1";
 const port = 3000;
 
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
+  res.setHeader("Content-Type", "text/plain");
+  res.end("Hello World\n");
 });
 
 server.listen(port, hostname, () => {
@@ -94,35 +94,49 @@ npm start
 Let's update `app.js` as following (app-v2.js):
 
 ```javascript
-const http = require('http');
+const http = require("http");
 
-const hostname = '127.0.0.1';
+const hostname = "127.0.0.1";
 const port = 3000;
 
 const server = http.createServer((req, res) => {
-  const body = 'Request URL: ' + req.url + '\n' +
-    'Request Method: ' + req.method + '\n' +
-    'Request Header: ' + JSON.stringify(req.headers) + '\n' +
-    'Request localAddress: ' + req.socket.localAddress + '\n' +
-    'Request localPort: ' + req.socket.localPort + '\n' +
+  const body =
+    "Request URL: " +
+    req.url +
+    "\n" +
+    "Request Method: " +
+    req.method +
+    "\n" +
+    "Request Header: " +
+    JSON.stringify(req.headers) +
+    "\n" +
+    "Request localAddress: " +
+    req.socket.localAddress +
+    "\n" +
+    "Request localPort: " +
+    req.socket.localPort +
+    "\n" +
+    "Request remoteAddress: " +
+    req.socket.remoteAddress +
+    "\n" +
+    "Request remotePort: " +
+    req.socket.remotePort +
+    "\n" +
+    "Request remoteFamily: " +
+    req.socket.remoteFamily +
+    "\n";
 
-    'Request remoteAddress: ' + req.socket.remoteAddress + '\n' +
-    'Request remotePort: ' + req.socket.remotePort + '\n' +
-    'Request remoteFamily: ' + req.socket.remoteFamily + '\n';
-  
-  var output = '';
-    if (req.url === '/') {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end('This is HOME page! \n' + body);
-    }
-    else if (req.url === '/about') {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end('This is ABOUT page! \n' + body);
-    }
-    else {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 error! File not found.');
-    }
+  var output = "";
+  if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("This is HOME page! \n" + body);
+  } else if (req.url === "/about") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("This is ABOUT page! \n" + body);
+  } else {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("404 error! File not found.");
+  }
 });
 
 server.listen(port, hostname, () => {
@@ -154,30 +168,28 @@ Update `app.js` as:
 
 ```javascript
 // Import node.js built-in http module
-const http = require('http');
+const http = require("http");
 
 // Import express module
-const express = require('express');
+const express = require("express");
 // Build app
 const app = express();
 
 // Use express to add middleware
 app.use((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is HOME page! \n');
-  }
-  else if (req.url === '/about') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is ABOUT page! \n');
-  }
-  else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('404 error! File not found. \n');
+  if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("This is HOME page! \n");
+  } else if (req.url === "/about") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("This is ABOUT page! \n");
+  } else {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("404 error! File not found. \n");
   }
 });
 
-const hostname = '127.0.0.1';
+const hostname = "127.0.0.1";
 const port = 3000;
 
 http.createServer(app).listen(port, hostname, () => {
@@ -191,30 +203,30 @@ Let's update `app.js` as (app-v3.js):
 
 ```javascript
 // Import node.js built-in http module
-const http = require('http');
+const http = require("http");
 
 // Import express
-const express = require('express');
+const express = require("express");
 // Build app
 const app = express();
 
 // Add middleware to handle '/'
 app.use((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is HOME page! \n');
+  if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("This is HOME page! \n");
     return; // The later middleware won't be run as response ends here
   }
-  
+
   // Continue to next middleware if request is not handled
   req.next();
 });
 
 // Add middleware to handle '/about'
 app.use((req, res) => {
-  if (req.url === '/about') {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('This is ABOUT page! \n');
+  if (req.url === "/about") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("This is ABOUT page! \n");
     return; // The later middleware won't be run as response ends here
   }
 
@@ -223,11 +235,11 @@ app.use((req, res) => {
 
 // Add middleware to handle all other requests
 app.use((req, res) => {
-  res.writeHead(404, { 'Content-Type': 'text/plain' })
-  res.end('404 error! File not found. \n');
+  res.writeHead(404, { "Content-Type": "text/plain" });
+  res.end("404 error! File not found. \n");
 });
 
-const hostname = '127.0.0.1';
+const hostname = "127.0.0.1";
 const port = 3000;
 
 http.createServer(app).listen(port, hostname, () => {
@@ -245,36 +257,36 @@ Update `app.js` as following (app-v4.js):
 
 ```javascript
 // Import node.js built-in http module
-const http = require('http');
+const http = require("http");
 
 // Import express
-const express = require('express');
+const express = require("express");
 // Build app
 const app = express();
 
 // Set response code
 app.use((req, res) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    // Continue to next middleware as request is not completely handled
-    req.next();
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  // Continue to next middleware as request is not completely handled
+  req.next();
 });
 
 // Add middleware to handle '/'
-app.get('/', (req, res) => {
-  res.end('This is HOME page! \n');
+app.get("/", (req, res) => {
+  res.end("This is HOME page! \n");
 });
 
 // Add middleware to handle '/about'
-app.get('/about', (req, res) => {
-  res.end('This is ABOUT page! \n');
+app.get("/about", (req, res) => {
+  res.end("This is ABOUT page! \n");
 });
 
 // Add middleware to handle all other requests
-app.get('*', (req, res) => {
-  res.end('404 error! File not found. \n');
+app.get("*", (req, res) => {
+  res.end("404 error! File not found. \n");
 });
 
-const hostname = '127.0.0.1';
+const hostname = "127.0.0.1";
 const port = 3000;
 
 app.listen(port, hostname, () => {
@@ -304,26 +316,26 @@ And initialize the `index.html` as following contents (or anything else as long 
 ```html
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Home Page</title>
-        <style>
-            h1 {
-                font: bold;
-                color: burlywood;
-                text-align: center;
-            }
+  <head>
+    <title>Home Page</title>
+    <style>
+      h1 {
+        font: bold;
+        color: burlywood;
+        text-align: center;
+      }
 
-            p {
-                color: blue;
-                text-align: center;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>This is most awesome web site</h1>
-        <p>You can never find a better one anywhere else</p>
-        <div id='app'></div>
-    </body>
+      p {
+        color: blue;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>This is most awesome web site</h1>
+    <p>You can never find a better one anywhere else</p>
+    <div id="app"></div>
+  </body>
 </html>
 ```
 
@@ -331,46 +343,49 @@ Go back to `\web\` folder. Update `app.js` to (app-v5.js):
 
 ```javascript
 // Import node.js built-in http module
-const http = require('http');
+const http = require("http");
 // Import node.js file system module
-const fs = require('fs');
+const fs = require("fs");
 // Import path module
-const path = require('path');
+const path = require("path");
 
 // Import express
-const express = require('express');
+const express = require("express");
 // Build app
 const app = express();
 
 // Add middleware to handle '/'
-app.get('/', (req, res) => {
-  res.writeHead(200, {'Content-Type': 'text/html'});
+app.get("/", (req, res) => {
+  res.writeHead(200, { "Content-Type": "text/html" });
   // Use node API fs.createReadStream to deal with file reading
-  var stream = fs.createReadStream(path.join(__dirname, '/src/public/index.html'), 'utf8');
+  var stream = fs.createReadStream(
+    path.join(__dirname, "/src/public/index.html"),
+    "utf8"
+  );
   stream.pipe(res);
 });
 
 // Render a specific html file
-app.get('/render', (req, res) => {
+app.get("/render", (req, res) => {
   // Use express API to response users' request
   // sendFile has the ability to set the Content-Type header based on file extension
-  res.sendFile('src/public/index.html', {
-    root: path.join(__dirname, '/')
-  } );
+  res.sendFile("src/public/index.html", {
+    root: path.join(__dirname, "/")
+  });
 });
 
 // Add middleware to handle '/about'
-app.get('/about', (req, res) => {
-  res.end('This is ABOUT page! \n');
+app.get("/about", (req, res) => {
+  res.end("This is ABOUT page! \n");
 });
 
 // Add middleware to handle all other requests
-app.get('*', (req, res) => {
-  res.writeHead(404, {'Content-Type': 'text/plain'});
-  res.end('404 error! File not found. \n');
+app.get("*", (req, res) => {
+  res.writeHead(404, { "Content-Type": "text/plain" });
+  res.end("404 error! File not found. \n");
 });
 
-const hostname = '127.0.0.1';
+const hostname = "127.0.0.1";
 const port = 3000;
 
 app.listen(port, hostname, () => {
@@ -382,24 +397,24 @@ You can observe that we are introducing two node modules:
 
 ```javascript
 // Import node.js file system module
-const fs = require('fs');
+const fs = require("fs");
 // Import path module
-const path = require('path');
+const path = require("path");
 ```
 
 The [fs](https://nodejs.org/dist/latest-v11.x/docs/api/fs.html) module provides an API for interacting with the file system in a manner closely modeled around standard POSIX functions. To use this module:
 
 ```javascript
-const fs = require('fs');
+const fs = require("fs");
 ```
 
 The [path](https://nodejs.org/dist/latest-v11.x/docs/api/path.html) module provides utilities for working with file and directory paths. It can be accessed using:
 
 ```javascript
-const path = require('path');
+const path = require("path");
 ```
 
-I've used two alternative methods to render a static file, node API `fs.createReadStream` and express API `res.sendFile`. In most situation, `res.sendFile`, which eventually calls the node `fs` APIs,  is fair enough for dealing with such kind requests.
+I've used two alternative methods to render a static file, node API `fs.createReadStream` and express API `res.sendFile`. In most situation, `res.sendFile`, which eventually calls the node `fs` APIs, is fair enough for dealing with such kind requests.
 
 From terminal while in `\web` directory, run `npm start`. And then browse <http://127.0.0.1:3000/> and <http://127.0.0.1:3000/render>. See what you can find.
 
@@ -542,7 +557,7 @@ module.exports = {
   output: {
     filename: "bundle.js"
   }
-}
+};
 ```
 
 Now run `npm run build`, you will find `.\dist\bundle.js` (instead of the default `main.js`) is generated. This is where you can define all your customization and extend configurations.
@@ -560,16 +575,16 @@ touch webpack.prod.config.js
 Initialize it with contents:
 
 ```javascript
-const path = require('path');
+const path = require("path");
 
 module.exports = {
   mode: "production",
   entry: "./src/index.js",
   output: {
     filename: "bundle.[contenthash:16].js",
-    path: path.join(__dirname, 'dist')
+    path: path.join(__dirname, "dist")
   }
-}
+};
 ```
 
 And then update the scripts from `package.json`:
@@ -595,15 +610,15 @@ And then update `webpack.config.js` as:
 
 ```javascript
 module.exports = {
-    mode: "development",
-    entry: "./src/index.js",
-    output: {
-      filename: "bundle.js"
-    },
-    devServer: {
-      contentBase: './dist',
-      port: 3000
-    }
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    filename: "bundle.js"
+  },
+  devServer: {
+    contentBase: "./dist",
+    port: 3000
+  }
 };
 ```
 
@@ -639,25 +654,25 @@ npm i html-webpack-plugin html-loader --save-dev
 Then update the `webpack.config.js`:
 
 ```javascript
-const path = require('path');
-const HtmlWebPackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development", // production
   entry: "./src/index.js",
   output: {
     filename: "bundle.js",
-    path: path.join(__dirname, 'dist') // dist is the default folder name while you can change it to any other name
+    path: path.join(__dirname, "dist") // dist is the default folder name while you can change it to any other name
   },
   devServer: {
-    contentBase: './dist',
+    contentBase: "./dist",
     port: 3000
   },
   module: {
     rules: [
       {
         test: /\.(html)$/,
-        use: [ { loader: "html-loader" } ]
+        use: [{ loader: "html-loader" }]
       }
     ]
   },
@@ -685,11 +700,12 @@ then the resulting HTML will be a default one, something like this:
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Webpack App</title>
   </head>
   <body>
-  <script type="text/javascript" src="bundle.js"></script></body>
+    <script type="text/javascript" src="bundle.js"></script>
+  </body>
 </html>
 ```
 
@@ -709,14 +725,14 @@ Initial `main.css` as:
 
 ```css
 h1 {
-    font: bold;
-    color: burlywood;
-    text-align: center;
+  font: bold;
+  color: burlywood;
+  text-align: center;
 }
 
 p {
-    color: blue;
-    text-align: center;
+  color: blue;
+  text-align: center;
 }
 ```
 
@@ -725,14 +741,14 @@ These styles actually are copied from the `\public\index.html`, so we now can re
 ```html
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Home Page</title>
-    </head>
-    <body>
-        <h1>This is the most awesome web site</h1>
-        <p>You can never find a better one anywhere else</p>
-        <div id='app'></div>
-    </body>
+  <head>
+    <title>Home Page</title>
+  </head>
+  <body>
+    <h1>This is the most awesome web site</h1>
+    <p>You can never find a better one anywhere else</p>
+    <div id="app"></div>
+  </body>
 </html>
 ```
 
@@ -747,15 +763,15 @@ npm i css-loader --save-dev
 For example, you want to import css in a javascript file:
 
 ```javascript
-import style from './style/myStyle.css';
-const anotherStyle = require('./style/anotherStyle.css');
+import style from "./style/myStyle.css";
+const anotherStyle = require("./style/anotherStyle.css");
 ```
 
 Then you will get build error if you don't use `css-loader`. You can update code to:
 
 ```javascript
-import style from 'css-loader!./style/myStyle.css';
-const anotherStyle = require('css-loader!./style/anotherStyle.css');
+import style from "css-loader!./style/myStyle.css";
+const anotherStyle = require("css-loader!./style/anotherStyle.css");
 ```
 
 You surely can get style things worked with above approach, while usually you should configure it in `webpack.config.js`. Then it will apply globally, instead of specifying `css-loader` everywhere. To configure `css-loader`, just add another rule to `webpack.config.js`:
@@ -780,7 +796,7 @@ You surely can get style things worked with above approach, while usually you sh
 Then you can update the `./src/index.js` as:
 
 ```javascript
-import css from './style/main.css';
+import css from "./style/main.css";
 
 console.log("hello webpack!");
 console.log(css);
@@ -819,6 +835,27 @@ Then add rule in `webpack.config.js`:
 ```
 
 Run `npm start`, you will find the styles are applied on the page.
+
+#### sass-loader
+
+To support **scss**, add `sass-loader` and `node-sass`:
+
+```bash
+npm i sass-loader node-sass --save-dev
+```
+
+Add sass-loader into the existing style configuration block in `webpack.config.js`:
+
+```javascript
+  {
+    test: [/.css$|.scss$/],
+    use: [
+      "style-loader",
+      'css-loader',
+      'sass-loader'
+    ]
+  }
+```
 
 #### Extracting css into a separated file
 
@@ -863,6 +900,68 @@ module.exports = {
 Run `npm start`. There will be a separate file `app.[hash:8].css` being generated in the `dist` folder. And from the `./dist/index.html`, this css file is referenced from `<link>` tag in `<head>` element.
 
 Browse <http://localhost:3000/>, the styles are applied on index page.
+
+### Processing images
+
+The [file-loader](https://webpack.js.org/loaders/file-loader) resolves `import/require()` on a file into a url and emits the file into the output directory:
+
+```bash
+npm install file-loader --save-dev
+```
+
+Update `webpack.config.js` to add rule for image files:
+
+```javascript
+{
+  test: /\.(png|jpg|gif|svg)$/,
+  use: [
+    {
+      loader: 'file-loader',
+      options: {
+        name: '[name].[hash:8].[ext]',
+        outputPath: 'assets/'
+      }
+    }
+  ]
+}
+```
+
+Then you can import image from a js file like this:
+
+```javascript
+import logo from "path/to/image/logo.png";
+```
+
+Let's try it.
+
+```bash
+cd src
+mkdir image
+```
+
+Find an image file, and save it in `./src/image` folder. Then include it from entry point `./src/index.js`:
+
+Update `index.js` as:
+
+```javascript
+import css from "./style/main.css";
+import background from "./image/beach-exotic-holiday.jpg";
+
+var print = msg => {
+  console.log(msg);
+};
+
+print("hello webpack!");
+
+console.log(background);
+var img = document.createElement("img");
+img.src = background;
+
+var container = document.getElementById("app");
+container.appendChild(img);
+```
+
+Build and run the application to check if image works.
 
 ## References
 

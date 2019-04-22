@@ -197,7 +197,7 @@ http.createServer(app).listen(port, hostname, () => {
 });
 ```
 
-Surely everything will work well. But still the ugly `if/else` is there. As we can see, express helps to add middleware to request pipeline. So why don't we just split every `if/else` into different middleware, and inject them all to request pipeline.
+Surely everything will work well. But still the ugly `if/else` is there. As we can see, express helps to add middleware to request pipeline. So why don't we just split every `if/else` into different middleware, and inject them all to request pipelines.
 
 Let's update `app.js` as (app-v3.js):
 
@@ -251,7 +251,7 @@ Run `npm start` to check if you get the expected results. We get some progress, 
 
 ### Introducing routing
 
-Routing is an approach to map the requests to respective handler, just like the above `if` pathes. Express has this great feature which enables us getting rid of all those `if/else`.
+Routing is an approach to map the requests to respective handler, just like the above `if` paths. Express has this great feature which enables us getting rid of all those `if/else`.
 
 Update `app.js` as following (app-v4.js):
 
@@ -414,7 +414,7 @@ The [path](https://nodejs.org/dist/latest-v11.x/docs/api/path.html) module provi
 const path = require("path");
 ```
 
-I've used two alternative methods to render a static file, node API `fs.createReadStream` and express API `res.sendFile`. In most situation, `res.sendFile`, which eventually calls the node `fs` APIs, is fair enough for dealing with such kind requests.
+Here I used two alternative methods to render a static file: node API `fs.createReadStream` and express API `res.sendFile`. In most situation, `res.sendFile`, which eventually calls the node `fs` APIs, is fair enough for dealing with such kind requests.
 
 From terminal while in `\web` directory, run `npm start`. And then browse <http://127.0.0.1:3000/> and <http://127.0.0.1:3000/render>. See what you can find.
 
@@ -644,7 +644,7 @@ From terminal, run `npm start`. It will build your code and launch the node serv
 webpack needs additional components to deal with HTML files: [html-webpack-plugin](https://webpack.js.org/plugins/html-webpack-plugin) and [html-loader](https://webpack.js.org/loaders/html-loader).
 
 > A [loader](https://webpack.js.org/concepts/loaders/) does preprocessing transformation of files with a specified file format **before** the bundle is generated. For example, a [ts-loader](https://github.com/TypeStrong/ts-loader) transforms Type-Script to JavaScript.
-
+>
 > A [plugin](https://webpack.js.org/concepts/plugins) will do everything that a loader cannot do. It works at bundle or chunk level, and usually work at the end of the bundle generation process.
 
 ```bash
@@ -963,8 +963,80 @@ container.appendChild(img);
 
 Build and run the application to check if image works.
 
+## Bring things together: express + webpack
+
+```bash
+npm i webpack-dev-middleware --save-dev
+```
+
+Update `app.js`:
+
+```javascript
+// Import node.js built-in http module
+const http = require("http");
+// Import node.js file system module
+const fs = require("fs");
+// Import path module
+const path = require("path");
+// Import express
+const express = require("express");
+
+// Webpack
+const webpack = require("webpack");
+// Import webpack-dev-middleware
+const webpackMiddleware = require("webpack-dev-middleware");
+const webpackConfig = require("./webpack.config");
+
+// Build express app
+const app = express();
+
+// Add webpack middleware
+const webpackApp = webpack(webpackConfig);
+app.use(webpackMiddleware(webpackApp));
+
+// Render a specific html file
+app.get("/render", (req, res) => {
+  // Use express API to response users' request
+  // sendFile has the ability to set the Content-Type header based on file extension
+  res.sendFile("src/public/index.html", {
+    root: path.join(__dirname, "/")
+  });
+});
+
+// Add middleware to handle '/about'
+app.get("/about", (req, res) => {
+  res.end("This is ABOUT page! \n");
+});
+
+// Add middleware to handle all other requests
+app.get("*", (req, res) => {
+  res.writeHead(404, { "Content-Type": "text/plain" });
+  res.end("404 error! File not found. \n");
+});
+
+const hostname = "127.0.0.1";
+const port = 3000;
+
+app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+```
+
+and update the scripts section of `package.json`:
+
+```json
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "webpack": "webpack && webpack-dev-server --open",
+    "dev": "rm -rf ./build/ && webpack",
+    "build": "rm -rf ./build/ && webpack --config webpack.prod.config.js"
+  },
+```
+
 ## References
 
 - [Setting up webpack for a project](https://auralinna.blog/post/2018/setting-up-webpack-4-for-a-project)
 - [webpack tutorial](https://www.valentinog.com/blog/webpack-tutorial/)
 - [Setting up webpack for any project](https://scotch.io/tutorials/setting-up-webpack-for-any-project)
+- [Setting up a minimal Node environment with Webpack and Babel](https://dev.to/aurelkurtula/setting-up-a-minimal-node-environment-with-webpack-and-babel--1j04)

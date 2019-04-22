@@ -7,12 +7,18 @@ const path = require("path");
 // Import express
 const express = require("express");
 
+// Webpack
+const webpack = require("webpack");
+// Import webpack-dev-middleware
+const webpackMiddleware = require("webpack-dev-middleware");
+const webpackConfig = require("./webpack.config");
+
 // Import chokidar for reloading server and refreshing frontend page instantly
 // once any file gets changed
 const chokidar = require("chokidar");
 
 const watcher = chokidar.watch(".", {
-  ignored: ["./node_modules/**", "./dist/**", "./.history.app.js/**"],
+  ignored: ["./node_modules/**", "./build/**", "./.history.app.js/**"],
   ignoreInitial: true
 });
 
@@ -34,17 +40,9 @@ watcher.on("all", (e, p) => {
 // Build express app
 const app = express();
 
-// Add middleware to handle '/'
-app.get("/", (req, res) => {
-  res.writeHead(200, { "Content-Type": "text/html" });
-  // Use node API fs.createReadStream to deal with file reading
-  var stream = fs.createReadStream(
-    path.join(__dirname, "/src/public/index.html"),
-    "utf8"
-  );
-  // pipe stream to response
-  stream.pipe(res);
-});
+// Add webpack middleware
+const webpackApp = webpack(webpackConfig);
+app.use(webpackMiddleware(webpackApp));
 
 // Render a specific html file
 app.get("/render", (req, res) => {

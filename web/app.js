@@ -10,6 +10,10 @@ const express = require("express");
 // Webpack
 const webpack = require("webpack");
 // Import webpack-dev-middleware
+// webpack-dev-middleware is a middleware which can be mounted in an express server
+// to serve the latest compilation of your bundle during development.
+// This uses webpack's Node API in watch mode, and instead of outputting to the file system it outputs to memory.
+// For production, you might want to use something like express.static instead of this middleware
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackConfig = require("./webpack.config");
 

@@ -965,6 +965,8 @@ Build and run the application to check if image works.
 
 ## Bring things together: express + webpack
 
+From above tutorial, we've leaned how to serve a web application with express server, and using webpack as development server for bundle application. Now let's connect these two: Use express server to serve a bundled application.
+
 ```bash
 npm i webpack-dev-middleware --save-dev
 ```
@@ -1022,7 +1024,7 @@ app.listen(port, hostname, () => {
 });
 ```
 
-and update the scripts section of `package.json`:
+and update the commands from `package.json`:
 
 ```json
   "scripts": {
@@ -1033,6 +1035,8 @@ and update the scripts section of `package.json`:
     "build": "rm -rf ./build/ && webpack --config webpack.prod.config.js"
   },
 ```
+
+Run `npm start`. Now our web application can serve both the bundled application and any other routes, like `/about` from `app.get("about", ...)`.
 
 ## References
 

@@ -21,7 +21,7 @@ module.exports = {
   mode: "production",
   entry: paths.entry,
   output: {
-    filename: "bundle.[contenthash:16].js",
+    filename: paths.script + "bundle.[contenthash:16].js",
     path: paths.build // dist is the default folder name while you can change it to any other name
   },
   // optimization: {

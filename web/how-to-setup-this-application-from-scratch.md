@@ -637,7 +637,7 @@ Now update the `scripts` section in `package.json` as:
 
 I update the `dev` command from `webpack --mode development` to `webpack`, 'cause I've added the `mode` parameter in `webpack.config.js`.
 
-From terminal, run `npm start`. It will build your code and launch the node server.
+From terminal, run `npm start`. It will build your code and launch the webpack dev server.
 
 ### Processing HTML
 

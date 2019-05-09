@@ -1,4 +1,4 @@
-import css from "./style/main.css";
+import "./style/main.css";
 import background from "./image/beach-exotic-holiday.jpg";
 
 var print = msg => {
